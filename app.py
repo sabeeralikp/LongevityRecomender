@@ -29,7 +29,10 @@ indices = pd.Series(dataset.index, index=dataset['Title']).drop_duplicates()
 
 def give_rec(title, sig=sig):
     # Get the index corresponding to original_title
-    idx = indices[title]
+    try:
+        idx = indices[title]
+    except:
+        return pd.DataFrame()
 
     # Get the pairwsie similarity scores 
     sig_scores = list(enumerate(sig[idx]))
@@ -44,7 +47,7 @@ def give_rec(title, sig=sig):
     movie_indices = [i[0] for i in sig_scores]
 
     # Top 10 most similar movies
-    return dataset['Title'].iloc[movie_indices]
+    return dataset.iloc[movie_indices]
 
 @app.route('/getrecs/', methods=['GET'])
 def respond():
@@ -54,15 +57,20 @@ def respond():
     # For debugging
     print(f"got title {title}")
 
-    response = {}
+    response = [{}]
 
     if not title:
         response["ERROR"] = "no title found, please send a title."
     elif str(title).isdigit():
         response["ERROR"] = "title can't be numeric."
     else:
-        response["recs"] = give_rec(title).to_json(orient="records")
-
+        response = give_rec(title)
+        if response.empty:
+            response = {'ERROR' : "no title found, please send a title."}
+        else:
+            response = response.to_dict("records")
+            
+        
     # Return the response in json format
     return Response(json.dumps(response), mimetype='application/json')
 
