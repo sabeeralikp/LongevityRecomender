@@ -5,7 +5,7 @@ app = Flask(__name__)
 import pandas as pd
 import numpy as np
 
-dataset = pd.read_csv("./Healthline.csv")
+dataset = pd.read_csv("./data.csv")
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import json
